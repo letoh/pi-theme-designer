@@ -127,7 +127,6 @@
   function handleExport() {
     theme.name = themeName;
     const exportColors = { ...theme.colors };
-    delete exportColors['muted'];
     const exportTheme = { ...theme, colors: exportColors };
     const exportData = JSON.stringify(exportTheme, null, 2);
     const blob = new Blob([exportData], { type: 'application/json' });
