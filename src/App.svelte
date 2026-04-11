@@ -284,7 +284,7 @@
   });
 
   function getCoreUIPreviewKeys(): string[] {
-    return ['accent', 'border', 'success', 'error', 'muted', 'dim', 'text'];
+    return ['border', 'success', 'text'];
   }
 
   function getBgPreviewKeys(): string[] {
@@ -542,12 +542,58 @@
                     </div>
                   {/if}
                 {/each}
-                <div class="preview-section-title">Warning</div>
-                <div class="warning-preview" class:light={previewBackground === 'light'} style="--warning-color: {getColorPreview(theme.colors.warning)}">
-                  <hr class="warning-hr" title={getColorInfo('warning', 'Warning line')} />
-                  <span class="warning-subject" title={getColorInfo('warning', 'Warning subject')}>warning subject</span>
-                  <span class="warning-content">content</span>
-                  <hr class="warning-hr" title={getColorInfo('warning', 'Warning line')} />
+                <div class="preview-section-title">Main UI</div>
+                <div class="main-ui-preview" class:light={previewBackground === 'light'} style="--md-heading: {getColorPreview(theme.colors.mdHeading)}; --accent-color: {getColorPreview(theme.colors.accent)}; --dim-color: {getColorPreview(theme.colors.dim)}; --thinking-off: {getColorPreview(theme.colors.thinkingOff)}">
+                  <span class="main-ui-bracket" title={getColorInfo('mdHeading', '[Skills]')}>[Skills]</span>
+                  <span class="main-ui-user" title={getColorInfo('accent', 'user')}>user</span>
+                  <span class="main-ui-path" title={getColorInfo('dim', 'path')}>path</span>
+                  <hr class="main-ui-hr" title={getColorInfo('thinkingOff', 'Divider')} />
+                  <span class="main-ui-input" title={getColorInfo('text', 'User input')}>(user input)</span>
+                  <hr class="main-ui-hr" title={getColorInfo('thinkingOff', 'Divider')} />
+                  <div class="main-ui-row">
+                    <span class="main-ui-path-alt" title={getColorInfo('dim', 'Path')}>path</span>
+                  </div>
+                  <div class="main-ui-stat">
+                    <span class="stat-label" title={getColorInfo('dim', 'Context stat')}>context stat</span>
+                    <span class="stat-value" title={getColorInfo('dim', 'Provider/model')}>provider/model</span>
+                  </div>
+                </div>
+                <div class="preview-section-title">Resume Session</div>
+                <div class="session-preview" class:light={previewBackground === 'light'} style="--accent-color: {getColorPreview(theme.colors.accent)}; --dim-color: {getColorPreview(theme.colors.dim)}; --muted-color: {getColorPreview(theme.colors.muted)}; --warning-color: {getColorPreview(theme.colors.warning)}; --selected-bg: {getColorPreview(theme.colors.selectedBg)}">
+                  <div class="session-header">
+                    <hr class="session-hr" title={getColorInfo('accent', 'Top divider')} />
+                    <div class="session-title-row">
+                      <span class="session-title">Resume Session</span>
+                    </div>
+                    <div class="tab-scope" title={getColorInfo('dim', 'Tab') + ' / ' + getColorInfo('muted', 'Scope')}><span class="tab-label">tab</span> <span class="scope-label">scope</span></div>
+                    <br />
+                    <span class="session-cursor"> ></span><br />
+                  </div>
+                  <div class="session-row selected" title={getColorInfo('selectedBg', 'Selected session')}>
+                    <span class="session-name selected" title={getColorInfo('accent', 'Selected session')}>selected session</span>
+                    <span class="session-time" title={getColorInfo('dim', 'Time')}>time</span>
+                  </div>
+                  <div class="session-row">
+                    <span class="session-name named" title={getColorInfo('warning', 'Named session')}>named session</span>
+                    <span class="session-time" title={getColorInfo('dim', 'Time')}>time</span>
+                  </div>
+                  <div class="session-row">
+                    <span class="session-name default-text">normal session</span>
+                    <span class="session-time" title={getColorInfo('dim', 'Time')}>time</span>
+                  </div>
+                  <br />
+                  <div class="session-divider" title={getColorInfo('accent', 'Divider')}></div>
+                  <div class="session-path" title={getColorInfo('dim', 'Path')}>path</div>
+                  <div class="session-stat">
+                    <span class="stat-label" title={getColorInfo('dim', 'Context stat')}>context stat</span>
+                    <span class="stat-value" title={getColorInfo('dim', 'Provider/model')}>provider/model</span>
+                  </div>
+                </div>
+                <div class="preview-section-title">Notification</div>
+                <div class="notification-preview" class:light={previewBackground === 'light'} style="--dim-color: {getColorPreview(theme.colors.dim)}; --warning-color: {getColorPreview(theme.colors.warning)}; --error-color: {getColorPreview(theme.colors.error)}">
+                  <div class="notification-line" title={getColorInfo('dim', 'Normal notification')} style="color: var(--dim-color)">normal notification</div>
+                  <div class="notification-line" title={getColorInfo('warning', 'Warning message')} style="color: var(--warning-color)">Warning: warning message</div>
+                  <div class="notification-line" title={getColorInfo('error', 'Error message')} style="color: var(--error-color)">Error: error message</div>
                 </div>
               {:else if category === 'Backgrounds & Content'}
                 {@const userMsgBg = getColorPreview(theme.colors.userMessageBg)}
@@ -1326,7 +1372,7 @@ file2</span>
     font-weight: bold;
   }
 
-  .warning-preview {
+  .notification-preview {
     display: flex;
     flex-direction: column;
     padding: 12px;
@@ -1337,23 +1383,170 @@ file2</span>
     gap: 4px;
   }
 
-  .warning-preview.light {
+  .notification-preview.light {
     background-color: #f5f5f5;
   }
 
-  .warning-preview .warning-hr {
-    border: none;
-    border-top: 2px solid var(--warning-color);
-    margin: 0;
+  .notification-preview .notification-line {
+    font-family: inherit;
+    font-size: inherit;
   }
 
-  .warning-preview .warning-subject {
-    color: var(--warning-color);
+  .main-ui-preview {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    background-color: #1a1a2e;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .main-ui-preview > span {
+    display: block;
+  }
+
+  .main-ui-preview.light {
+    background-color: #f5f5f5;
+  }
+
+  .main-ui-preview .main-ui-bracket {
+    color: var(--md-heading);
     font-weight: bold;
   }
 
-  .warning-preview .warning-content {
-    color: #e6e6e6;
+  .main-ui-preview .main-ui-user {
+    color: var(--accent-color);
+    padding-left: 16px;
+  }
+
+  .main-ui-preview .main-ui-path {
+    color: var(--dim-color);
+    padding-left: 32px;
+  }
+
+  .main-ui-preview .main-ui-path-alt {
+    color: var(--dim-color);
+  }
+
+  .main-ui-preview .main-ui-hr {
+    border: none;
+    border-top: 1px solid var(--thinking-off);
+    margin: 4px 0;
+    width: 100%;
+  }
+
+  .main-ui-preview .main-ui-input {
+    color: #a0a0a0;
+  }
+
+  .light .main-ui-preview .main-ui-input {
+    color: #000000;
+  }
+
+  .main-ui-preview .main-ui-row {
+    display: flex;
+  }
+
+  .main-ui-preview .main-ui-stat {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .main-ui-preview .stat-label,
+  .main-ui-preview .stat-value {
+    color: var(--dim-color);
+  }
+
+  .session-preview {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    background-color: #1a1a2e;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .session-preview.light {
+    background-color: #f5f5f5;
+  }
+
+  .session-preview .session-hr,
+  .session-preview .session-divider {
+    border: none;
+    border-top: 1px solid var(--accent-color);
+    margin: 4px 0;
+    width: 100%;
+  }
+
+  .session-preview .session-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .session-preview .session-title {
+    font-weight: bold;
+  }
+
+  .session-preview .session-path {
+    color: var(--dim-color);
+  }
+
+  .session-preview .session-stat {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .session-preview .stat-label,
+  .session-preview .stat-value {
+    color: var(--dim-color);
+  }
+
+  .session-preview .tab-label {
+    color: var(--dim-color);
+  }
+
+  .session-preview .scope-label {
+    color: var(--muted-color);
+  }
+
+  .session-preview .session-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 4px;
+  }
+
+  .session-preview .session-row.selected {
+    background-color: var(--selected-bg);
+  }
+
+  .session-preview .session-name {
+    color: var(--dim-color);
+  }
+
+  .session-preview .session-name.selected {
+    color: var(--accent-color);
+  }
+
+  .session-preview .session-name.named {
+    color: var(--warning-color);
+  }
+
+  .session-preview .session-time {
+    color: var(--dim-color);
+  }
+
+  /* Default text color: Gray in dark mode, Black in light mode */
+  .session-preview .default-text {
+    color: #a0a0a0 !important;
+  }
+
+  .light .session-preview .default-text {
+    color: #000000 !important;
   }
 
   .tool-pending-preview {
