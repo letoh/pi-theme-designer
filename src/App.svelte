@@ -8,13 +8,14 @@
   let fileInputRef: HTMLInputElement | null = null;
 
   const colorCategories = {
-    'Core UI': ['accent', 'border', 'borderAccent', 'borderMuted', 'success', 'error', 'warning', 'muted', 'dim', 'text', 'thinkingText'],
-    'Backgrounds & Content': ['selectedBg', 'userMessageBg', 'userMessageText', 'customMessageBg', 'customMessageText', 'customMessageLabel', 'toolPendingBg', 'toolSuccessBg', 'toolErrorBg', 'toolTitle', 'toolOutput'],
+    'Core UI': ['accent', 'border', 'borderAccent', 'borderMuted', 'success', 'error', 'warning', 'muted', 'dim', 'text', 'thinkingOff', 'selectedBg'],
+    'Backgrounds & Content': ['thinkingText', 'userMessageBg', 'userMessageText', 'customMessageBg', 'customMessageText', 'customMessageLabel', 'toolPendingBg', 'toolSuccessBg', 'toolErrorBg', 'toolTitle', 'toolOutput'],
     'Markdown': ['mdHeading', 'mdLink', 'mdLinkUrl', 'mdCode', 'mdCodeBlock', 'mdCodeBlockBorder', 'mdQuote', 'mdQuoteBorder', 'mdHr', 'mdListBullet'],
     'Tool Diffs': ['toolDiffAdded', 'toolDiffRemoved', 'toolDiffContext'],
     'Syntax Highlighting': ['syntaxComment', 'syntaxKeyword', 'syntaxFunction', 'syntaxVariable', 'syntaxString', 'syntaxNumber', 'syntaxType', 'syntaxOperator', 'syntaxPunctuation'],
     'Thinking Level Borders': ['thinkingOff', 'thinkingMinimal', 'thinkingLow', 'thinkingMedium', 'thinkingHigh', 'thinkingXhigh'],
-    'Bash Mode': ['bashMode', 'muted']
+    'Bash Mode': ['bashMode', 'muted'],
+    'HTML Export': ['pageBg', 'cardBg', 'infoBg']
   };
 
   let expandedCategories = $state<Record<string, boolean>>({});
@@ -47,7 +48,13 @@
     if (category === 'Bash Mode' && key === 'muted') {
       return theme.colors['muted'] || '';
     }
-    return theme.colors[key] || '';
+    if (category === 'Core UI' && key === 'thinkingOff') {
+      return theme.colors['thinkingOff'] || '';
+    }
+    if (category === 'HTML Export') {
+      return (theme.export as any)?.[key] || theme.colors.userMessageBg || '';
+    }
+    return theme.colors[key as keyof typeof theme.colors] || '';
   }
 
   function resolveColorValue(color: string): string {
@@ -63,9 +70,16 @@
   }
 
   function setColorValue(key: string, value: string, category?: string) {
-    theme.colors = { ...theme.colors, [key]: value };
+    if (category === 'HTML Export') {
+      theme.export = { ...(theme.export as any), [key]: value };
+    } else {
+      theme.colors = { ...theme.colors, [key]: value };
+    }
     if (category === 'Bash Mode' && key === 'muted') {
       theme.colors = { ...theme.colors, ['muted']: value };
+    }
+    if (category === 'Core UI' && key === 'thinkingOff') {
+      theme.colors = { ...theme.colors, ['thinkingOff']: value };
     }
   }
 
@@ -125,9 +139,21 @@
   }
 
   function handleExport() {
-    theme.name = themeName;
-    const exportColors = { ...theme.colors };
-    const exportTheme = { ...theme, colors: exportColors };
+    const exportTheme: any = {
+      $schema: theme.$schema,
+      name: themeName,
+    };
+
+    if (theme.vars && Object.keys(theme.vars).length > 0) {
+      exportTheme.vars = { ...theme.vars };
+    }
+
+    exportTheme.colors = { ...theme.colors };
+
+    if (theme.export && (theme.export.pageBg || theme.export.cardBg || theme.export.infoBg)) {
+      exportTheme.export = { ...theme.export };
+    }
+
     const exportData = JSON.stringify(exportTheme, null, 2);
     const blob = new Blob([exportData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -284,11 +310,11 @@
   });
 
   function getCoreUIPreviewKeys(): string[] {
-    return ['border', 'success', 'text'];
+    return [];
   }
 
   function getBgPreviewKeys(): string[] {
-    return ['selectedBg'];
+    return [];
   }
 
   function getMdPreviewKeys(): string[] {
@@ -358,7 +384,10 @@
     thinkingMedium: 'Medium thinking',
     thinkingHigh: 'High thinking',
     thinkingXhigh: 'Extra high thinking',
-    bashMode: 'Editor border in bash mode (! prefix)'
+    bashMode: 'Editor border in bash mode (! prefix)',
+    pageBg: 'HTML export page background',
+    cardBg: 'HTML export card background',
+    infoBg: 'HTML export info background'
   };
 
   function getPurpose(colorKey: string): string {
@@ -547,6 +576,7 @@
                   <span class="main-ui-bracket" title={getColorInfo('mdHeading', '[Skills]')}>[Skills]</span>
                   <span class="main-ui-user" title={getColorInfo('accent', 'user')}>user</span>
                   <span class="main-ui-path" title={getColorInfo('dim', 'path')}>path</span>
+                  <br />
                   <hr class="main-ui-hr" title={getColorInfo('thinkingOff', 'Divider')} />
                   <span class="main-ui-input" title={getColorInfo('text', 'User input')}>(user input)</span>
                   <hr class="main-ui-hr" title={getColorInfo('thinkingOff', 'Divider')} />
@@ -614,6 +644,11 @@
                 <div class="user-message-preview" style="--user-msg-bg: {userMsgBg}; --user-msg-text: {userMsgText}">
                   <span class="user-prompt" title={getColorInfo('userMessageText', 'User prompt')}>user prompt</span>
                 </div>
+                {@const thinkingTextColor = getColorPreview(theme.colors.thinkingText)}
+                <div class="preview-section-title">Thinking Text</div>
+                <div class="thinking-text-preview" style="--thinking-text-bg: {thinkingTextColor}; --text-color: #000000">
+                  <span class="thinking-text-content" title={getColorInfo('thinkingText', 'Thinking text')}>Thinking: ...</span>
+                </div>
                 {@const customMsgBg = getColorPreview(theme.colors.customMessageBg)}
                 {@const customMsgText = getColorPreview(theme.colors.customMessageText)}
                 <div class="preview-section-title">Extension (Custom) Message</div>
@@ -647,28 +682,28 @@ Tool xxx not found
                   
                   <p class="md-text">
                     <a class="md-link" href="#!" style="color: {getColorPreview(theme.colors.mdLink)}" title={getColorInfo('mdLink', 'Link text')}>Link</a>
-                    and <a class="md-link-url" href="#!" style="color: {getColorPreview(theme.colors.mdLinkUrl)}" title={getColorInfo('mdLinkUrl', 'Link URL')}>https://url.com</a>
+                    <span class="default-text">and</span> <a class="md-link-url" href="#!" style="color: {getColorPreview(theme.colors.mdLinkUrl)}" title={getColorInfo('mdLinkUrl', 'Link URL')}>https://url.com</a>
                   </p>
                   
                   <p class="md-text">
-                    Inline <code class="md-code" style="color: {getColorPreview(theme.colors.mdCode)}" title={getColorInfo('mdCode', 'Inline code')}>code</code> and code block:
+                    <span class="default-text">Inline</span> <code class="md-code" style="color: {getColorPreview(theme.colors.mdCode)}" title={getColorInfo('mdCode', 'Inline code')}>code</code> <span class="default-text">and code block:</span>
                   </p>
                   
                   <pre class="md-code-block" style="color: {getColorPreview(theme.colors.mdCodeBlock)}; border-color: {getBorderColor(theme.colors.mdCodeBlockBorder)}" title="{getColorInfo('mdCodeBlock', 'Code block content')}; {getColorInfo('mdCodeBlockBorder', 'Code block border')}"><code>const x = 1;</code></pre>
                   
-                  <blockquote class="md-quote" style="color: {getColorPreview(theme.colors.mdQuote)}; border-left-color: {getBorderColor(theme.colors.mdQuoteBorder)}" title="{getColorInfo('mdQuote', 'Blockquote text')}; {getColorInfo('mdQuoteBorder', 'Blockquote border')}">
-                    <p>Blockquote text</p>
-                    <p>continued</p>
-                  </blockquote>
-                  
+                  <hr class="md-hr" style="border-color: {getBorderColor(theme.colors.mdHr)}" title={getColorInfo('mdHr', 'Horizontal rule')} />
+
+                  <p class="md-text">(Horizontal rule)</p>
+
                   <ul class="md-list" style="color: {getColorPreview(theme.colors.mdListBullet)}" title={getColorInfo('mdListBullet', 'List bullet')}>
                     <li>List item 1</li>
                     <li>List item 2</li>
                   </ul>
                   
-                  <hr class="md-hr" style="border-color: {getBorderColor(theme.colors.mdHr)}" title={getColorInfo('mdHr', 'Horizontal rule')} />
-                  
-                  <p class="md-text">Horizontal rule</p>
+                  <blockquote class="md-quote" style="color: {getColorPreview(theme.colors.mdQuote)}; border-left-color: {getBorderColor(theme.colors.mdQuoteBorder)}" title="{getColorInfo('mdQuote', 'Blockquote text')}; {getColorInfo('mdQuoteBorder', 'Blockquote border')}">
+                    <p>Blockquote text</p>
+                    <p>continued</p>
+                  </blockquote>
                 </div>
               {:else if category === 'Tool Diffs'}
                 <div class="diff-preview" class:light={previewBackground === 'light'}>
@@ -682,16 +717,16 @@ Tool xxx not found
                   </div>
                   <div class="diff-line diff-context" style="color: {getColorPreview(theme.colors.toolDiffContext)}" title={getColorInfo('toolDiffContext', 'Context line')}>
                     <span class="diff-symbol"> </span>
-                    <span>Context line</span>
+                    <span class="default-text">Context line</span>
                   </div>
                 </div>
               {:else if category === 'Syntax Highlighting'}
                 <div class="syntax-preview" class:light={previewBackground === 'light'}>
                   <pre class="syntax-code"><code><span style="color: {getColorPreview(theme.colors.syntaxComment)}" title={getColorInfo('syntaxComment', 'Comment')}>// comment</span>
-<span style="color: {getColorPreview(theme.colors.syntaxKeyword)}" title={getColorInfo('syntaxKeyword', 'Keyword')}>function</span> <span style="color: {getColorPreview(theme.colors.syntaxFunction)}" title={getColorInfo('syntaxFunction', 'Function')}>name</span>()<span style="color: {getColorPreview(theme.colors.syntaxOperator)}" title={getColorInfo('syntaxOperator', 'Operator')}>:</span> <span style="color: {getColorPreview(theme.colors.syntaxType)}" title={getColorInfo('syntaxType', 'Type')}>type</span> {'{'}
-  <span style="color: {getColorPreview(theme.colors.syntaxKeyword)}" title={getColorInfo('syntaxKeyword', 'Keyword')}>const</span> <span style="color: {getColorPreview(theme.colors.syntaxVariable)}" title={getColorInfo('syntaxVariable', 'Variable')}>var</span><span style="color: {getColorPreview(theme.colors.syntaxOperator)}" title={getColorInfo('syntaxOperator', 'Operator')}>:</span> <span style="color: {getColorPreview(theme.colors.syntaxType)}" title={getColorInfo('syntaxType', 'Type')}>type</span> <span style="color: {getColorPreview(theme.colors.syntaxOperator)}" title={getColorInfo('syntaxOperator', 'Operator')}>=</span> <span style="color: {getColorPreview(theme.colors.syntaxNumber)}" title={getColorInfo('syntaxNumber', 'Number')}>42</span><span style="color: {getColorPreview(theme.colors.syntaxPunctuation)}" title={getColorInfo('syntaxPunctuation', 'Punctuation')}>;</span>
+<span style="color: {getColorPreview(theme.colors.syntaxKeyword)}" title={getColorInfo('syntaxKeyword', 'Keyword')}>function</span> <span style="color: {getColorPreview(theme.colors.syntaxFunction)}" title={getColorInfo('syntaxFunction', 'Function')}>name</span><span class="default-text">():</span> <span style="color: {getColorPreview(theme.colors.syntaxType)}" title={getColorInfo('syntaxType', 'Type')}>type</span><span class="default-text">{'{'}</span>
+  <span style="color: {getColorPreview(theme.colors.syntaxKeyword)}" title={getColorInfo('syntaxKeyword', 'Keyword')}>const</span> <span style="color: {getColorPreview(theme.colors.syntaxVariable)}" title={getColorInfo('syntaxVariable', 'Variable')}>var</span><span class="default-text">:</span> <span style="color: {getColorPreview(theme.colors.syntaxType)}" title={getColorInfo('syntaxType', 'Type')}>type</span> <span style="color: {getColorPreview(theme.colors.syntaxOperator)}" title={getColorInfo('syntaxOperator', 'Operator')}>=</span> <span style="color: {getColorPreview(theme.colors.syntaxNumber)}" title={getColorInfo('syntaxNumber', 'Number')}>42</span><span style="color: {getColorPreview(theme.colors.syntaxPunctuation)}" title={getColorInfo('syntaxPunctuation', 'Punctuation')}>;</span>
   <span style="color: {getColorPreview(theme.colors.syntaxKeyword)}" title={getColorInfo('syntaxKeyword', 'Keyword')}>return</span> <span style="color: {getColorPreview(theme.colors.syntaxString)}" title={getColorInfo('syntaxString', 'String')}>"string"</span><span style="color: {getColorPreview(theme.colors.syntaxPunctuation)}" title={getColorInfo('syntaxPunctuation', 'Punctuation')}>;</span>
-{'}'}</code></pre>
+<span class="default-text">{'}'}</span></code></pre>
                 </div>
               {:else if category === 'Thinking Level Borders'}
                 {#each getThinkingPreviewKeys() as colorKey}
@@ -1441,7 +1476,7 @@ file2</span>
     color: #a0a0a0;
   }
 
-  .light .main-ui-preview .main-ui-input {
+  .main-ui-preview.light .main-ui-input {
     color: #000000;
   }
 
@@ -1541,11 +1576,17 @@ file2</span>
   }
 
   /* Default text color: Gray in dark mode, Black in light mode */
-  .session-preview .default-text {
+  .session-preview .default-text,
+  .md-preview .default-text,
+  .diff-preview .default-text,
+  .syntax-preview .default-text {
     color: #a0a0a0 !important;
   }
 
-  .light .session-preview .default-text {
+  .session-preview.light .default-text,
+  .md-preview.light .default-text,
+  .diff-preview.light .default-text,
+  .syntax-preview.light .default-text {
     color: #000000 !important;
   }
 
@@ -1579,6 +1620,18 @@ file2</span>
     border-radius: 4px;
     font-family: 'Fira Code', monospace;
     font-size: 12px;
+  }
+
+  .thinking-text-preview {
+    background: var(--thinking-text-bg);
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+  }
+
+  .thinking-text-preview .thinking-text-content {
+    color: var(--text-color);
   }
 
   .custom-message-preview .custom-msg-text {

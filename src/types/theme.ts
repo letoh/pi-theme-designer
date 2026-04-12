@@ -17,9 +17,9 @@ export interface ThemeVars {
 }
 
 export interface ThemeExport {
-  pageBg: string;
-  cardBg: string;
-  infoBg: string;
+  pageBg?: string;
+  cardBg?: string;
+  infoBg?: string;
 }
 
 export interface ThemeColors {

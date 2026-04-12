@@ -43,7 +43,8 @@ Exported JSON includes:
   "$schema": "https://raw.githubusercontent.com/badlogic/pi-mono/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
   "name": "my-theme",
   "vars": { ... },
-  "colors": { ... }
+  "colors": { ... },
+  "export": { ... }
 }
 ```
 
