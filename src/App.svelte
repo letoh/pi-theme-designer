@@ -185,7 +185,8 @@
               name: loadedTheme.name || 'imported-theme',
               $schema: loadedTheme.$schema || THEME_SCHEMA_URL,
               colors: { ...loadedTheme.colors },
-              vars: loadedTheme.vars || {}
+              vars: loadedTheme.vars || {},
+              export: loadedTheme.export || {}
             };
             previewColors = {};
           }
